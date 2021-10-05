@@ -23,7 +23,9 @@ const builtinExtensions = {
     ev3: () => require('../extensions/scratch3_ev3'),
     makeymakey: () => require('../extensions/scratch3_makeymakey'),
     boost: () => require('../extensions/scratch3_boost'),
-    gdxfor: () => require('../extensions/scratch3_gdx_for')
+    gdxfor: () => require('../extensions/scratch3_gdx_for'),
+    // own extension by btemperli
+    raspylora: () => require('../extensions/scratch3_raspylora'),
 };
 
 /**
@@ -97,6 +99,12 @@ class ExtensionManager {
         dispatch.setService('extensions', this).catch(e => {
             log.error(`ExtensionManager was unable to register extension service: ${JSON.stringify(e)}`);
         });
+
+        /**
+         * Todo: is there a better way to activate own extensions on start?
+         */
+        log.info('load own extensions now.');
+        this.loadExtensionIdSync('raspylora');
     }
 
     /**
