@@ -48,7 +48,7 @@ let connectAttempt = false;
 let wait_open = [];
 let theLocale = null;
 
-const webserverIpAddress = '192.168.43.159';
+const webserverIpAddress = '192.168.2.122';
 
 // common
 const FormNumberCall = {
