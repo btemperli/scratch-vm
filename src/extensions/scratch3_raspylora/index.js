@@ -21,9 +21,15 @@
  */
 
 function getMyLocalIp () {
-    var ip = require('ip');
+    const os = require('os');
+    const ip = require('ip');
 
     console.log('current ip: ' +  ip.address());
+    console.log('current platform: ' +  os.platform());
+
+    if (os.platform() === 'linux') {
+        return 'raspberrypi.local';
+    }
     return ip.address();
 }
 
@@ -32,6 +38,7 @@ const ArgumentType = require('../../extension-support/argument-type');
 const BlockType = require('../../extension-support/block-type');
 const formatMessage = require('format-message');
 const log = require('../../util/log');
+const os = require("os");
 
 // The following are constants used within the extension
 
