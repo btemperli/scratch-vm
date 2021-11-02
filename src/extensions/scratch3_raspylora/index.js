@@ -20,6 +20,13 @@
  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+function getMyLocalIp () {
+    var ip = require('ip');
+
+    console.log(ip.address());
+    return ip.address();
+}
+
 // Boiler plate from the Scratch Team
 const ArgumentType = require('../../extension-support/argument-type');
 const BlockType = require('../../extension-support/block-type');
@@ -48,7 +55,7 @@ let connectAttempt = false;
 let wait_open = [];
 let theLocale = null;
 
-const webserverIpAddress = 'localhost';
+const webserverIpAddress = getMyLocalIp();
 
 // common
 const FormNumberCall = {
