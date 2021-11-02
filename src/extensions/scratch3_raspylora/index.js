@@ -26,11 +26,13 @@ function getMyLocalIp () {
 
     console.log('current ip: ' +  ip.address());
     console.log('current platform: ' +  os.platform());
+    console.log('current hostname: ' +  os.hostname());
 
-    if (os.platform() === 'linux') {
-        return 'raspberrypi.local';
+    if (os.hostname() === 'localhost') {
+        return ip.address();
     }
-    return ip.address();
+
+    return 'raspberrypi.local';
 }
 
 // Boiler plate from the Scratch Team
@@ -39,6 +41,7 @@ const BlockType = require('../../extension-support/block-type');
 const formatMessage = require('format-message');
 const log = require('../../util/log');
 const os = require("os");
+const ip = require("ip");
 
 // The following are constants used within the extension
 
