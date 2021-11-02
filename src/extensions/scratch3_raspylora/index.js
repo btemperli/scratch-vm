@@ -48,12 +48,18 @@ let connectAttempt = false;
 let wait_open = [];
 let theLocale = null;
 
-const webserverIpAddress = '192.168.2.122';
+const webserverIpAddress = 'localhost';
 
 // common
 const FormNumberCall = {
-    en: 'Send a number [NUMBER]',
-    de: 'Schicke eine Nummer [NUMBER]'
+    en: 'Number → Display [NUMBER]',
+    de: 'Nummer → Display [NUMBER]'
+};
+
+// common
+const FormNumberSend = {
+    en: 'Number → LoRa [NUMBER]',
+    de: 'Nummer → LoRa [NUMBER]'
 };
 
 const FormServerListener = {
@@ -88,6 +94,18 @@ class Scratch3RpiPython {
                     opcode: 'numberWrite',
                     blockType: BlockType.COMMAND,
                     text: FormNumberCall[theLocale],
+                    arguments: {
+                        n: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: '10',
+                            menu: 'digital_number'
+                        }
+                    }
+                },
+                {
+                    opcode: 'numberSendLoRa',
+                    blockType: BlockType.COMMAND,
+                    text: FormNumberSend[theLocale],
                     arguments: {
                         n: {
                             type: ArgumentType.NUMBER,
@@ -137,12 +155,39 @@ class Scratch3RpiPython {
             }
         }
 
+        // run the "display" command
         if (connected) {
             log.info(args);
             const n = args.NUMBER;
             const number = parseInt(n, 10);
 
             msg = {display: number};
+            msg = JSON.stringify(msg);
+            log.info(msg);
+            window.socketr.send(msg);
+        } else {
+            const callbackEntry = [this.numberWrite.bind(this), args];
+            wait_open.push(callbackEntry);
+        }
+    }
+
+    // The block handlers
+    // command blocks
+    numberSendLoRa (args) {
+        // Same as always
+        if (!connected) {
+            if (!connectionPending) {
+                this.connect();
+                connectionPending = true;
+            }
+        }
+
+        // run the "send" command
+        if (connected) {
+            log.info(args);
+            const n = args.NUMBER;
+
+            msg = {send: n};
             msg = JSON.stringify(msg);
             log.info(msg);
             window.socketr.send(msg);
