@@ -23,7 +23,7 @@
 function getMyLocalIp () {
     var ip = require('ip');
 
-    console.log(ip.address());
+    console.log('current ip: ' +  ip.address());
     return ip.address();
 }
 
