@@ -101,7 +101,7 @@ class Scratch3RpiPython {
         // this.connect();
 
         return {
-            id: 'raspipython',
+            id: 'raspylora',
             color1: '#226666',
             color2: '#669999',
             name: 'Python Raspberry Pi',
