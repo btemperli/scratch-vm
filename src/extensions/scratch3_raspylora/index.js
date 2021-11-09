@@ -204,7 +204,7 @@ class Scratch3RpiPython {
             log.info(args);
             const n = args.NUMBER;
 
-            msg = {send: n};
+            msg = {send: n.toString()};
             msg = JSON.stringify(msg);
             log.info(msg);
             window.socketr.send(msg);
