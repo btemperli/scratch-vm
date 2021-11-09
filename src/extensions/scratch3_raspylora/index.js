@@ -29,8 +29,8 @@ function getMyLocalIp () {
     console.log('current hostname: ' +  os.hostname());
 
     if (os.hostname() === 'localhost') {
-        // return ip.address();
-        return '192.168.1.136';
+        return ip.address();
+        // return '192.168.1.136';
     }
 
     return 'raspberrypi.local';
