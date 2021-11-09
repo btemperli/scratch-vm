@@ -24,6 +24,7 @@ const {loadCostume} = require('./import/load-costume.js');
 const {loadSound} = require('./import/load-sound.js');
 const {serializeSounds, serializeCostumes} = require('./serialization/serialize-assets');
 require('canvas-toBlob');
+// const fs = require('fs');
 
 const RESERVED_NAMES = ['_mouse_', '_stage_', '_edge_', '_myself_', '_random_'];
 
@@ -166,6 +167,28 @@ class VirtualMachine extends EventEmitter {
         this.flyoutBlockListener = this.flyoutBlockListener.bind(this);
         this.monitorBlockListener = this.monitorBlockListener.bind(this);
         this.variableListener = this.variableListener.bind(this);
+
+        console.log('check if the base-project exists...');
+        this.checkForProject();
+    }
+
+    /**
+     * Nice to have: load an existing project at the start of the scratch environment.
+     * Auto-save the project from time to time to a user-based project for the next start.
+     * Do not overwrite the "default basic project".
+     */
+    checkForProject () {
+        // @todo: check this one...
+        // problem: fs not working in this webpack setup.
+        // so we cannot preload a file directly on start...
+        // hint: somewhere, the basic "empty" project is loaded on start.
+
+        // if (fs.existsSync('./../project.sb3')) {
+            // file exists
+            // console.log('file exists');
+        // } else {
+        console.log('The file does not exist');
+        // }
     }
 
     /**

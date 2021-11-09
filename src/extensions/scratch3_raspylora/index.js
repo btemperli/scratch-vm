@@ -29,7 +29,8 @@ function getMyLocalIp () {
     console.log('current hostname: ' +  os.hostname());
 
     if (os.hostname() === 'localhost') {
-        return ip.address();
+        // return ip.address();
+        return '192.168.1.136';
     }
 
     return 'raspberrypi.local';
@@ -80,9 +81,14 @@ const FormNumberSend = {
 };
 
 const FormServerListener = {
-    en: 'Receive [ECHO] from server',
-    de: 'Erhalte [ECHO] vom Server'
+    en: 'A message from the network',
+    de: 'Nachricht aus dem Netzwerk'
 };
+
+const ResponseFromServer = {
+    en: 'LoRa Response',
+    de: 'LoRa Nachricht'
+}
 
 // General Alert
 const FormWSClosed = {
@@ -98,7 +104,6 @@ class Scratch3RpiPython {
 
     getInfo () {
         theLocale = this._setLocale();
-        // this.connect();
 
         return {
             id: 'raspylora',
@@ -132,16 +137,29 @@ class Scratch3RpiPython {
                     }
                 },
                 {
+                    opcode: 'responseFromServer',
+                    blockType: BlockType.REPORTER,
+                    branchCount: 0,
+                    terminal: false,
+                    text: ResponseFromServer[theLocale],
+                    arguments: {
+                        // Required: the ID of the argument, which will be the name in the
+                        // args object passed to the implementation function.
+                        RESPONSE: {
+                            // Required: type of the argument / shape of the block input
+                            type: ArgumentType.STRING,
+                            default: 'hello'
+                        },
+                    },
+
+                    // Optional: the function implementing this block.
+                    // If absent, assume `func` is the same as `opcode`.
+                    func: 'loraMessageReporter'
+                },
+                {
                     opcode: 'listenToServer',
                     blockType: BlockType.HAT,
-                    text: FormServerListener[theLocale],
-                    arguments: {
-                        ECHO: {
-                            type: ArgumentType.NUMBER,
-                            defaultValue: '0',
-                            menu: 'listen_server'
-                        }
-                    }
+                    text: FormServerListener[theLocale]
                 }
             ],
             menus: {
@@ -157,8 +175,15 @@ class Scratch3RpiPython {
         };
     }
 
-    // The block handlers
-    // command blocks
+    /**
+     * COMMAND
+     * Send a number to the display via the server
+     *
+     * Checks if the server is connected. Establish connection if not.
+     * Sends a message {display: number} to the server.
+     *
+     * @param args
+     */
     numberWrite (args) {
         log.info('connected');
         log.info(connected);
@@ -188,8 +213,15 @@ class Scratch3RpiPython {
         }
     }
 
-    // The block handlers
-    // command blocks
+    /**
+     * COMMAND
+     * Send a number to LoRa via the server
+     *
+     * Checks if the server is connected. Establish connection if not.
+     * Sends a message {send: number} to the server.
+     *
+     * @param args
+     */
     numberSendLoRa (args) {
         // Same as always
         if (!connected) {
@@ -214,6 +246,15 @@ class Scratch3RpiPython {
         }
     }
 
+    /**
+     * HAT
+     * Listen to the server
+     *
+     * Is active when the server sends a response to scratch.
+     *
+     * @param args
+     * @param util
+     */
     listenToServer (args, util) {
         if (lastMessageReceived) {
             log.info('listenToServer.');
@@ -221,10 +262,32 @@ class Scratch3RpiPython {
             log.info(args);
             log.info(echo);
             lastMessageReceived = false;
-            lastMessage = null;
             return true;
         }
     }
+
+    /**
+     * REPORTER
+     * Lora Message
+     *
+     * Takes the last received message from the server and saves it as a variable (or reporter).
+     * @see https://github.com/LLK/scratch-vm/blob/develop/docs/extensions.md
+     *
+     * @param {object} args - the block's arguments.
+     * @returns {string} a string which includes the received message.
+     */
+    loraMessageReporter (args) {
+        let receivedMessage = '';
+
+        if (lastMessage) {
+            receivedMessage = lastMessage;
+            lastMessage = null;
+        }
+
+        log.info('REPORTER: receive message.');
+        log.info(receivedMessage);
+        return receivedMessage;
+    };
 
     _setLocale () {
         let nowLocale = '';
