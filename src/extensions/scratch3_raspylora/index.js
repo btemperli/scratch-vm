@@ -41,8 +41,6 @@ const ArgumentType = require('../../extension-support/argument-type');
 const BlockType = require('../../extension-support/block-type');
 const formatMessage = require('format-message');
 const log = require('../../util/log');
-const os = require("os");
-const ip = require("ip");
 
 // The following are constants used within the extension
 
@@ -130,9 +128,7 @@ class Scratch3RpiPython {
                     text: FormNumberSend[theLocale],
                     arguments: {
                         n: {
-                            type: ArgumentType.NUMBER,
-                            defaultValue: '10',
-                            menu: 'digital_number'
+                            type: ArgumentType.STRING
                         }
                     }
                 },
