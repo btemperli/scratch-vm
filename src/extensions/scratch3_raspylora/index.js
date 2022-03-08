@@ -28,12 +28,17 @@ function getMyLocalIp () {
     console.log('current platform: ' +  os.platform());
     console.log('current hostname: ' +  os.hostname());
 
+    // this is the case when we are on a laptop / macbook
     if (os.hostname() === 'localhost') {
         return ip.address();
         // return '192.168.1.136';
     }
 
-    return 'raspberrypi.local';
+    // otherwise we are on a raspberry pi.
+    return 'localhost';
+    
+    // we cannot return 'raspberry.local', because it will be found multiple times in the network.
+    // all the raspberry pis will connect with one of the devices.
 }
 
 // Boiler plate from the Scratch Team
