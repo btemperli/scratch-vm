@@ -71,14 +71,14 @@ const webserverIpAddress = getMyLocalIp();
 
 // common
 const FormMessageSendDisplay = {
-    en: 'Message → Display [MESSAGE]',
-    de: 'Nachricht → Display [MESSAGE]'
+    en: '[MESSAGE] → Display',
+    de: '[MESSAGE] → Display'
 };
 
 // common
 const FormMessageSendNetwork = {
-    en: 'Message → Network [MESSAGE]',
-    de: 'Nachricht → Netzwerk [MESSAGE]'
+    en: '[MESSAGE] → Network',
+    de: '[MESSAGE] → Netzwerk'
 };
 
 const FormServerListener = {
@@ -99,6 +99,16 @@ const ReporterRemoveFirstLetters = {
 const ReporterRemoveLastLetters = {
     en: 'Remove last [NUMBERS] Letters from [TEXT]',
     de: 'Entferne [NUMBERS] Zeichen am Ende von [TEXT]'
+}
+
+const ReporterEncryptText = {
+    en: 'Encrypt [TEXT] with [PASSWORD]',
+    de: 'Verschlüssle [TEXT] mit [PASSWORD]',
+}
+
+const ReporterDecryptText = {
+    en: 'Decrypt [CIPHER] with [PASSWORD]',
+    de: 'Entschlüssle [CIPHER] mit [PASSWORD]',
 }
 
 // General Alert
@@ -145,6 +155,7 @@ class Scratch3RpiPython {
                         }
                     }
                 },
+                '---',
                 {
                     opcode: 'reporterRemoveFirstLetters',
                     blockType: BlockType.REPORTER,
@@ -185,6 +196,48 @@ class Scratch3RpiPython {
                         }
                     }
                 },
+                '---',
+                {
+                    opcode: 'reporterEncryptText',
+                    blockType: BlockType.REPORTER,
+                    branchCount: 0,
+                    terminal: false,
+                    text: ReporterEncryptText[theLocale],
+                    arguments: {
+                        // Required: the ID of the argument, which will be the name in the
+                        // args object passed to the implementation function.
+                        TEXT: {
+                            // Required: type of the argument / shape of the block input
+                            type: ArgumentType.STRING,
+                            defaultValue: 'hello'
+                        },
+                        PASSWORD: {
+                            type: ArgumentType.STRING,
+                            defaultValue: 'password'
+                        }
+                    }
+                },
+                {
+                    opcode: 'reporterDecryptText',
+                    blockType: BlockType.REPORTER,
+                    branchCount: 0,
+                    terminal: false,
+                    text: ReporterDecryptText[theLocale],
+                    arguments: {
+                        // Required: the ID of the argument, which will be the name in the
+                        // args object passed to the implementation function.
+                        CIPHER: {
+                            // Required: type of the argument / shape of the block input
+                            type: ArgumentType.STRING,
+                            defaultValue: 'U2FsdGVkX1'
+                        },
+                        PASSWORD: {
+                            type: ArgumentType.STRING,
+                            defaultValue: 'password'
+                        }
+                    }
+                },
+                '---',
                 {
                     opcode: 'listenToServer',
                     blockType: BlockType.HAT,
@@ -354,7 +407,6 @@ class Scratch3RpiPython {
      * @returns {string} the modified string
      */
     reporterRemoveLastLetters(args) {
-        log(args);
         let n = args.NUMBERS;
         let text = args.TEXT;
         let newText = text.slice(0, n * -1);
@@ -362,6 +414,24 @@ class Scratch3RpiPython {
         log.info('REPORTER: remove last letters');
         log.info(newText);
         return newText;
+    }
+
+    reporterDecryptText(args) {
+        const cipher = args.CIPHER;
+        const password = args.PASSWORD;
+        const CryptoJS = require("crypto-js");
+        const text_bytes = CryptoJS.AES.decrypt(cipher, password);
+        log.info(text_bytes.toString(CryptoJS.enc.Utf8));
+        return text_bytes.toString(CryptoJS.enc.Utf8);
+    }
+
+    reporterEncryptText(args) {
+        const text = args.TEXT;
+        const password = args.PASSWORD;
+        const CryptoJS = require("crypto-js");
+        const cipher = CryptoJS.AES.encrypt(text, password).toString();
+        log.info(cipher);
+        return cipher;
     }
 
 
