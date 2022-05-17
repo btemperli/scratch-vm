@@ -1,6 +1,4 @@
 /*
-  Todo: check license...
-
  This is a Scratch 3 extension to control python commands on a Raspberry Pi
 
  Copyright (c) 2021 Beat Temperli All rights reserved.
@@ -73,14 +71,14 @@ const webserverIpAddress = getMyLocalIp();
 
 // common
 const FormMessageSendDisplay = {
-    en: 'Message → Display [STRING]',
-    de: 'Nachricht → Display [STRING]'
+    en: 'Message → Display [MESSAGE]',
+    de: 'Nachricht → Display [MESSAGE]'
 };
 
 // common
 const FormMessageSendNetwork = {
-    en: 'Message → Network [STRING]',
-    de: 'Nachricht → Netzwerk [STRING]'
+    en: 'Message → Network [MESSAGE]',
+    de: 'Nachricht → Netzwerk [MESSAGE]'
 };
 
 const FormServerListener = {
@@ -91,6 +89,16 @@ const FormServerListener = {
 const ResponseFromServer = {
     en: 'Message',
     de: 'Nachricht'
+}
+
+const ReporterRemoveFirstLetters = {
+    en: 'Remove first [NUMBERS] Letters from [TEXT]',
+    de: 'Entferne [NUMBERS] Zeichen am Anfang von [TEXT]'
+}
+
+const ReporterRemoveLastLetters = {
+    en: 'Remove last [NUMBERS] Letters from [TEXT]',
+    de: 'Entferne [NUMBERS] Zeichen am Ende von [TEXT]'
 }
 
 // General Alert
@@ -120,8 +128,9 @@ class Scratch3RpiPython {
                     blockType: BlockType.COMMAND,
                     text: FormMessageSendDisplay[theLocale],
                     arguments: {
-                        n: {
+                        MESSAGE: {
                             type: ArgumentType.STRING,
+                            defaultValue: 'text'
                         }
                     }
                 },
@@ -130,10 +139,56 @@ class Scratch3RpiPython {
                     blockType: BlockType.COMMAND,
                     text: FormMessageSendNetwork[theLocale],
                     arguments: {
-                        n: {
-                            type: ArgumentType.STRING
+                        MESSAGE: {
+                            type: ArgumentType.STRING,
+                            defaultValue: 'text'
                         }
                     }
+                },
+                {
+                    opcode: 'reporterRemoveFirstLetters',
+                    blockType: BlockType.REPORTER,
+                    branchCount: 0,
+                    terminal: false,
+                    text: ReporterRemoveFirstLetters[theLocale],
+                    arguments: {
+                        // Required: the ID of the argument, which will be the name in the
+                        // args object passed to the implementation function.
+                        NUMBERS: {
+                            // Required: type of the argument / shape of the block input
+                            type: ArgumentType.NUMBER,
+                            defaultValue: 0
+                        },
+                        TEXT: {
+                            type: ArgumentType.STRING,
+                            defaultValue: 'text'
+                        }
+                    }
+                },
+                {
+                    opcode: 'reporterRemoveLastLetters',
+                    blockType: BlockType.REPORTER,
+                    branchCount: 0,
+                    terminal: false,
+                    text: ReporterRemoveLastLetters[theLocale],
+                    arguments: {
+                        // Required: the ID of the argument, which will be the name in the
+                        // args object passed to the implementation function.
+                        NUMBERS: {
+                            // Required: type of the argument / shape of the block input
+                            type: ArgumentType.NUMBER,
+                            defaultValue: 0
+                        },
+                        TEXT: {
+                            type: ArgumentType.STRING,
+                            defaultValue: 'text'
+                        }
+                    }
+                },
+                {
+                    opcode: 'listenToServer',
+                    blockType: BlockType.HAT,
+                    text: FormServerListener[theLocale]
                 },
                 {
                     opcode: 'responseFromServer',
@@ -146,31 +201,15 @@ class Scratch3RpiPython {
                         // args object passed to the implementation function.
                         RESPONSE: {
                             // Required: type of the argument / shape of the block input
-                            type: ArgumentType.STRING,
-                            default: 'hello'
+                            type: ArgumentType.STRING
                         },
                     },
 
                     // Optional: the function implementing this block.
                     // If absent, assume `func` is the same as `opcode`.
                     func: 'loraMessageReporter'
-                },
-                {
-                    opcode: 'listenToServer',
-                    blockType: BlockType.HAT,
-                    text: FormServerListener[theLocale]
                 }
-            ],
-            menus: {
-                digital_numbers: {
-                    acceptReporters: true,
-                    items: ['10', '20', '30', '40', '50', '60']
-                },
-                listen_server: {
-                    acceptReporters: true,
-                    items: ['10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20']
-                }
-            }
+            ]
         };
     }
 
@@ -198,10 +237,9 @@ class Scratch3RpiPython {
 
         // run the "display" command
         if (connected) {
-            log.info(args);
-            const s = args.STRING;
+            const message = args.MESSAGE;
 
-            msg = {display: s};
+            msg = {display: message.toString()};
             msg = JSON.stringify(msg);
             log.info(msg);
             window.socketr.send(msg);
@@ -231,10 +269,9 @@ class Scratch3RpiPython {
 
         // run the "send" command
         if (connected) {
-            log.info(args);
-            const n = args.NUMBER;
+            const message = args.MESSAGE;
 
-            msg = {send: n.toString()};
+            msg = {send: message.toString()};
             msg = JSON.stringify(msg);
             log.info(msg);
             window.socketr.send(msg);
@@ -286,6 +323,47 @@ class Scratch3RpiPython {
         log.info(receivedMessage);
         return receivedMessage;
     };
+
+    /**
+     * REPORTER
+     * Remove first n characters of a string.
+     *
+     * Modifies a text to cut the start of the given string.
+     *
+     * @param args
+     * @returns {string} the modified string
+     */
+    reporterRemoveFirstLetters(args) {
+        log(args);
+        let n = args.NUMBERS;
+        let text = args.TEXT;
+        let newText = text.slice(n);
+
+        log.info('REPORTER: remove first letters');
+        log.info(newText);
+        return newText;
+    }
+
+    /**
+     * REPORTER
+     * Remove last n characters of a string.
+     *
+     * Modifies a text to cut the end of the given string.
+     *
+     * @param args
+     * @returns {string} the modified string
+     */
+    reporterRemoveLastLetters(args) {
+        log(args);
+        let n = args.NUMBERS;
+        let text = args.TEXT;
+        let newText = text.slice(0, n * -1);
+
+        log.info('REPORTER: remove last letters');
+        log.info(newText);
+        return newText;
+    }
+
 
     _setLocale () {
         let nowLocale = '';
