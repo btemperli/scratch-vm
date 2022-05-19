@@ -54,7 +54,7 @@ let connectionPending = false;
 
 // general outgoing websocket message holder
 let msg = null;
-let lastMessage = null;
+let lastMessages = [];
 let lastMessageReceived = false;
 
 // flag to indicate if the user connected to a board
@@ -344,7 +344,7 @@ class Scratch3RpiPython {
      * @param util
      */
     listenToServer (args, util) {
-        if (lastMessageReceived) {
+        if (lastMessageReceived || lastMessages.length) {
             log.info('listenToServer.');
             const echo = args['ECHO'];
             log.info(args);
@@ -367,9 +367,8 @@ class Scratch3RpiPython {
     loraMessageReporter (args) {
         let receivedMessage = '';
 
-        if (lastMessage) {
-            receivedMessage = lastMessage;
-            lastMessage = null;
+        if (lastMessages.length) {
+            receivedMessage = lastMessages.shift();
         }
 
         log.info('REPORTER: receive message.');
@@ -498,7 +497,7 @@ class Scratch3RpiPython {
 
             try {
                 msg = JSON.parse(message.data);
-                lastMessage = msg;
+                lastMessages.push(msg);
                 lastMessageReceived = true;
                 log.info(msg);
             } catch (error) {
