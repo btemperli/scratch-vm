@@ -91,6 +91,11 @@ const ResponseFromServer = {
     de: 'Nachricht'
 }
 
+const NoResponseFromServerReceived = {
+    en: 'No message received',
+    de: 'Keine neue Nachricht erhalten'
+}
+
 const ReporterRemoveFirstLetters = {
     en: 'Remove first [NUMBERS] Letters from [TEXT]',
     de: 'Entferne [NUMBERS] Zeichen am Anfang von [TEXT]'
@@ -369,6 +374,9 @@ class Scratch3RpiPython {
 
         if (lastMessages.length) {
             receivedMessage = lastMessages.shift();
+        } else {
+            theLocale = this._setLocale();
+            receivedMessage = NoResponseFromServerReceived[theLocale];
         }
 
         log.info('REPORTER: receive message.');
