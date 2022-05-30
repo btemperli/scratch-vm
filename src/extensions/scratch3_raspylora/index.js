@@ -502,15 +502,27 @@ class Scratch3RpiPython {
         window.socketr.onmessage = function (message) {
             log.info('onmessage');
             log.info(message);
+            msg = null;
 
             try {
+                // todo: do we need to parse JSON?
                 msg = JSON.parse(message.data);
-                lastMessages.push(msg);
-                lastMessageReceived = true;
-                log.info(msg);
             } catch (error) {
+                log.info('onmessage.json-parse-error');
                 log.info(error);
+
+                try {
+                    // try without parsing.
+                    msg = message.data;
+                } catch (error) {
+                    log.info('onmessage.try2-error');
+                    log.info(error);
+                }
             }
+
+            lastMessages.push(msg);
+            lastMessageReceived = true;
+            log.info(msg);
         };
     }
 }
