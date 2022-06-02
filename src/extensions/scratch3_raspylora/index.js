@@ -118,8 +118,8 @@ const ReporterDecryptText = {
 
 // General Alert
 const FormWSClosed = {
-    en: 'WebSocket Connection Is Closed.',
-    de: 'WebSocket-Verbindung geschlossen.'
+    en: 'Connection lost. Please restart.',
+    de: 'Verbindung verloren. Bitte neu starten.'
 };
 
 class Scratch3RpiPython {
